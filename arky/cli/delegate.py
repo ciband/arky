@@ -2,7 +2,7 @@
 # © Toons
 
 """
-Usage: 
+Usage:
     delegate link [<secret>] [<2ndSecret>]
     delegate unlink
     delegate save <name>
@@ -61,7 +61,7 @@ def _loadDelegate():
 
 
 def link(param):
-	_link(dict(param, **{"--escrow":False}))
+	_link(dict(param, **{"--escrow": False}))
 	if not _loadDelegate():
 		sys.stdout.write("Not a delegate\n")
 		unlink(param)
@@ -81,7 +81,7 @@ def forged(param):
 	if DATA.delegate:
 		resp = rest.GET.api.delegates.forging.getForgedByAccount(generatorPublicKey=DATA.account["publicKey"])
 		if resp.pop("success"):
-			util.prettyPrint(dict([k,float(v)/100000000] for k,v in resp.items()))
+			util.prettyPrint(dict([k, float(v) / 100000000] for k, v in resp.items()))
 
 
 def voters(param):
@@ -89,8 +89,8 @@ def voters(param):
 		accounts = rest.GET.api.delegates.voters(publicKey=DATA.delegate["publicKey"]).get("accounts", [])
 		sum_ = 0.
 		log = collections.OrderedDict()
-		for addr, vote in sorted([[c["address"], float(c["balance"]) / 100000000] for c in accounts], key=lambda e:e[-1]):
+		for addr, vote in sorted([[c["address"], float(c["balance"]) / 100000000] for c in accounts], key=lambda e: e[-1]):
 			log[addr] = "%.3f" % vote
 			sum_ += vote
-		log["%d voters"%len(accounts)] = "%.3f" % sum_
+		log["%d voters" % len(accounts)] = "%.3f" % sum_
 		util.prettyPrint(log)

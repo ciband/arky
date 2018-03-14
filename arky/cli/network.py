@@ -2,7 +2,7 @@
 # © Toons
 
 """
-Usage: 
+Usage:
     network use [<name> -b <number> -l <ms>]
     network browse [-t|-a <id>]
     network publickey <secret>
@@ -40,6 +40,7 @@ import sys
 import imp
 import webbrowser
 
+
 def _whereami():
 	return "network"
 
@@ -58,12 +59,11 @@ def use(param):
 	rest.use(
 		param.get("<name>"),
 		broadcast=int(param.get("--broadcast", 10)),
-		timeout=float(param.get("--latency", 5000))/1000
+		timeout=float(param.get("--latency", 5000)) / 1000
 	)
 
 	logger = logging.getLogger()
-	logger.handlers[0].setFormatter(logging.Formatter('[%s]'%cfg.network + '[%(asctime)s] %(message)s'))
-
+	logger.handlers[0].setFormatter(logging.Formatter('[%s]' % cfg.network + '[%(asctime)s] %(message)s'))
 
 
 def browse(param):
@@ -93,7 +93,7 @@ def delegates(param):
 		delegates = resp["delegates"]
 		maxlen = max([len(d["username"]) for d in delegates])
 		i = 1
-		for name, vote in sorted([(d["username"], float(d["vote"])/100000000) for d in delegates], key=lambda e: e[-1], reverse=True):
+		for name, vote in sorted([(d["username"], float(d["vote"]) / 100000000) for d in delegates], key=lambda e: e[-1], reverse=True):
 			sys.stdout.write("    #%02d - %s: %.3f\n" % (i, name.ljust(maxlen), vote))
 			i += 1
 	else:

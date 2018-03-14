@@ -58,11 +58,8 @@ def get(entrypoint, **kwargs):
     except Exception as error:
         data = {"success": False, "error": error, "peer": peer}
     else:
-        # if not data.get("success"):
-        #     return data
-        if return_key:
+        if data.get("success") is True and return_key:
             data = data[return_key]
-
             if isinstance(data, dict):
                 for item in ["balance", "unconfirmedBalance", "vote"]:
                     if item in data:

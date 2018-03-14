@@ -8,7 +8,6 @@ import sys
 
 __version__ = "1.3.3"
 
-__PY3__ = True if sys.version_info[0] >= 3 else False
 __FROZEN__ = hasattr(sys, "frozen") or hasattr(sys, "importers") or imp.is_frozen("__main__")
 
 if __FROZEN__:

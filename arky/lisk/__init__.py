@@ -56,7 +56,7 @@ def sendPayload(*payloads):
 
 
 #######################
-## basic transaction ##
+#  basic transaction  #
 #######################
 
 def sendToken(amount, recipientId, secret, secondSecret=None):
@@ -67,6 +67,7 @@ def sendToken(amount, recipientId, secret, secondSecret=None):
         secondSecret=secondSecret
     )
 
+
 def registerSecondPublicKey(secondPublicKey, secret, secondSecret=None):
     keys = crypto.getKeys(secret)
     return sendTransaction(
@@ -74,12 +75,14 @@ def registerSecondPublicKey(secondPublicKey, secret, secondSecret=None):
         publicKey=keys["publicKey"],
         privateKey=keys["privateKey"],
         secondSecret=secondSecret,
-        asset={"signature":{"publicKey":secondPublicKey}}
+        asset={"signature": {"publicKey": secondPublicKey}}
     )
+
 
 def registerSecondPassphrase(secondPassphrase, secret, secondSecret=None):
     secondKeys = crypto.getKeys(secondPassphrase)
     return registerSecondPublicKey(secondKeys["publicKey"], secret, secondSecret)
+
 
 def registerDelegate(username, secret, secondSecret=None):
     keys = crypto.getKeys(secret)
@@ -88,8 +91,9 @@ def registerDelegate(username, secret, secondSecret=None):
         publicKey=keys["publicKey"],
         privateKey=keys["privateKey"],
         secondSecret=secondSecret,
-        asset={"delegate":{"username":username, "publicKey":publicKey}}
+        asset={"delegate": {"username": username, "publicKey": publicKey}}
     )
+
 
 def upVoteDelegate(usernames, secret, secondSecret=None):
     keys = crypto.getKeys(secret)
@@ -99,8 +103,9 @@ def upVoteDelegate(usernames, secret, secondSecret=None):
         privateKey=keys["privateKey"],
         recipientId=crypto.getAddress(keys["publicKey"]),
         secondSecret=secondSecret,
-        asset={"votes":["+%s"%pk for pk in util.getDelegatesPublicKeys(*usernames)]}
+        asset={"votes": ["+%s" % pk for pk in util.getDelegatesPublicKeys(*usernames)]}
     )
+
 
 def downVoteDelegate(usernames, secret, secondSecret=None):
     keys = crypto.getKeys(secret)
@@ -110,5 +115,5 @@ def downVoteDelegate(usernames, secret, secondSecret=None):
         privateKey=keys["privateKey"],
         recipientId=crypto.getAddress(keys["publicKey"]),
         secondSecret=secondSecret,
-        asset={"votes":["-%s"%pk for pk in util.getDelegatesPublicKeys(*usernames)]}
+        asset={"votes": ["-%s" % pk for pk in util.getDelegatesPublicKeys(*usernames)]}
     )
