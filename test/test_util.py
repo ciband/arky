@@ -5,7 +5,6 @@ import unittest
 
 from arky import rest, cli
 
-
 class TestUtilDef(unittest.TestCase):
 
 	@classmethod
@@ -19,7 +18,6 @@ class TestUtilDef(unittest.TestCase):
 	def test_floatAmount(self):
 		# can' test because `floatAmount` function still seems to be WIP
 		pass
-
 
 if __name__ == '__main__':
     unittest.main()
