@@ -2,7 +2,7 @@
 # © Toons
 
 """
-Usage:
+Usage: 
     ledger link [-i <index> -r <rank>]
     ledger unlink
     ledger status
@@ -22,8 +22,8 @@ Subcommands:
     vote     : up or down vote delegate(s). <delegates> can be a coma-separated list
                or a valid new-line-separated file list conaining delegate names.
 """
-#   ledger validate <registry>
-#   validate : validate transaction from registry.
+    # ledger validate <registry>
+    # validate : validate transaction from registry.
 
 from .. import HOME
 from .. import rest
@@ -32,8 +32,12 @@ from .. import util
 from .. import ldgr
 from .. import slots
 
+from . import __PY3__
+from . import PROMPT
 from . import DATA
+from . import parse
 from . import input
+from . import __name__ as __root_name__
 from . import floatAmount
 from . import askYesOrNo
 
@@ -44,8 +48,6 @@ import traceback
 import arky
 import sys
 import os
-
-from arky.exceptions import ParserException
 
 
 def _sign(tx, derivation_path):
@@ -67,6 +69,12 @@ def _sign(tx, derivation_path):
 	return False
 
 
+def _return():
+	sys.stdout.write("Ledger not available on %s network\n" % cfg.network)
+	PROMPT.module = sys.modules[__root_name__]
+	parse(["ledger", ".."])
+
+
 def _whereami():
 	if hasattr(cfg, "slip44"):
 		if DATA.ledger:
@@ -74,13 +82,14 @@ def _whereami():
 		else:
 			return "ledger"
 	else:
-		raise ParserException('Ledger not available on {} network'.format(cfg.network))
+		_return()
+		return ""
 
 
 def link(param):
 	if hasattr(cfg, "slip44"):
 
-		ledger_dpath = "44'/" + cfg.slip44 + "'/%(--account-index)s'/0/%(--address-rank)s" % param
+		ledger_dpath = "44'/"+cfg.slip44+"'/%(--account-index)s'/0/%(--address-rank)s" % param
 		try:
 			publicKey = ldgr.getPublicKey(ldgr.parseBip32Path(ledger_dpath))
 			address = arky.core.crypto.getAddress(publicKey)
@@ -94,7 +103,7 @@ def link(param):
 				DATA.ledger["path"] = ledger_dpath
 
 	else:
-		raise ParserException('Ledger not available on {} network'.format(cfg.network))
+		_return()
 
 
 def status(param):
@@ -120,11 +129,11 @@ def send(param):
 				type=0,
 				timestamp=int(slots.getTime()),
 				fee=cfg.fees["send"],
-				amount=int(amount * 100000000),
+				amount=int(amount*100000000),
 				recipientId=param["<address>"],
 				vendorField=param["<message>"],
 			)
-
+			
 			if _sign(tx, DATA.ledger["path"]): _send(tx)
 
 
@@ -187,3 +196,4 @@ def vote(param):
 # 				sys.stdout.write("    Not the valid thirdparty passphrase\n")
 # 		else:
 # 			sys.stdout.write("    Transaction registry not found\n")
+

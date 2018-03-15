@@ -36,7 +36,7 @@ Subcommands:
     vote     : up or down vote delegate(s). <delegates> can be a coma-separated list
                or a valid new-line-separated file list conaining delegate names.
     send     : send token amount to address. You can set a 64-char message.
-    wsend    : send token amount to multiple addresses using <weighting> json file
+    wsend    : send token amount to multiple addresses using <weighting> json file 
 	           (address-weight pairs). You can set a 64-char message.
 """
 
@@ -63,8 +63,8 @@ def _send(payload):
 	_address = DATA.getCurrentAddress()
 	if DATA.escrowed:
 		folder = os.path.join(HOME, ".escrow", cfg.network)
-		if not os.path.exists(folder):
-			os.makedirs(folder)
+		try: os.makedirs(folder)
+		except: pass
 		sys.stdout.write("    Writing transaction...\n")
 		registry_file = "%s.escrow" % (_address if _address else "thirdparty")
 		registry = util.loadJson(registry_file, folder)
@@ -76,12 +76,12 @@ def _send(payload):
 		util.dumpJson(registry, registry_file, folder)
 	else:
 		folder = os.path.join(HOME, ".registry", cfg.network)
-		if not os.path.exists(folder):
-			os.makedirs(folder)
+		try: os.makedirs(folder)
+		except: pass
 		registry_file = "%s.registry" % (_address if _address else "thirdparty")
 		registry = util.loadJson(registry_file, folder)
 		typ_ = payload["type"]
-		sys.stdout.write(("    Broadcasting transaction of %.8f %s to %s\n" % (payload["amount"] / 100000000, cfg.token, payload["recipientId"])) if typ_ == 0 else \
+		sys.stdout.write(("    Broadcasting transaction of %.8f %s to %s\n" % (payload["amount"]/100000000, cfg.token, payload["recipientId"])) if typ_ == 0 else \
 		                  "    Broadcasting vote...\n" if typ_ == 3 else \
 						  "    Broadcasting transaction...\n")
 		resp = arky.core.sendPayload(payload)
@@ -115,10 +115,10 @@ def _getVoteList(param):
 			fmt = "+%s"
 			to_vote = [username for username in usernames if username not in voted]
 
-		return [fmt % pk for pk in util.getDelegatesPublicKeys(*to_vote)], verb, to_vote
+		return [fmt%pk for pk in util.getDelegatesPublicKeys(*to_vote)], verb, to_vote
 
 	elif len(voted):
-		util.prettyPrint(dict([d["username"], "%s%%" % d["approval"]] for d in voted))
+		util.prettyPrint(dict([d["username"], "%s%%"%d["approval"]] for d in voted))
 
 	return [], "", []
 
@@ -214,7 +214,7 @@ def register(param):
 					publicKey=DATA.firstkeys["publicKey"],
 					privateKey=DATA.firstkeys["privateKey"],
 					secondPrivateKey=DATA.secondkeys.get("privateKey", None),
-					asset={"signature": {"publicKey": secondPublicKey}}
+					asset={"signature":{"publicKey":secondPublicKey}}
 				))
 		elif param["escrow"]:
 			if DATA.account["secondPublicKey"]:
@@ -233,7 +233,7 @@ def register(param):
 					publicKey=DATA.firstkeys["publicKey"],
 					privateKey=DATA.firstkeys["privateKey"],
 					secondPrivateKey=DATA.secondkeys.get("privateKey", None),
-					asset={"signature": {"publicKey": secondPublicKey}}
+					asset={"signature":{"publicKey":secondPublicKey}}
 				))
 		else:
 			username = param["<username>"]
@@ -245,7 +245,7 @@ def register(param):
 					publicKey=DATA.firstkeys["publicKey"],
 					privateKey=DATA.firstkeys["privateKey"],
 					secondPrivateKey=DATA.secondkeys.get("privateKey", None),
-					asset={"delegate": {"username": username, "publicKey": DATA.firstkeys["publicKey"]}}
+					asset={"delegate":{"username":username, "publicKey":DATA.firstkeys["publicKey"]}}
 				))
 
 
@@ -269,7 +269,7 @@ def validate(param):
 				choices = util.chooseMultipleItem("Transactions(s) found:", *items)
 				if askYesOrNo("Validate transactions %s ?" % ",".join([str(i) for i in choices])):
 					for idx in choices:
-						tx = registry["transactions"].pop(idx - 1)
+						tx = registry["transactions"].pop(idx-1)
 						tx["signSignature"] = arky.core.crypto.getSignature(tx, thirdpartyKeys["privateKey"])
 						tx["id"] = arky.core.crypto.getId(tx)
 						_send(tx)
@@ -309,7 +309,7 @@ def send(param):
 		                        {"token": cfg.token, "amount": amount, "recipientId": param["<address>"]}) \
 		          and checkSecondKeys():
 			_send(arky.core.crypto.bakeTransaction(
-				amount=amount * 100000000,
+				amount=amount*100000000,
 				recipientId=param["<address>"],
 				vendorField=param["<message>"],
 				publicKey=DATA.firstkeys["publicKey"],
@@ -338,11 +338,11 @@ def wsend(param):
 		                        {"token": cfg.token, "amount": amount, "recipientId": len(weighting)}) \
 				  and checkSecondKeys():
 
-			for address, weight in weighting.items():
-				share = weight * amount
-				if share * 100000000 > cfg.fees["send"]:
+			for address,weight in weighting.items():
+				share = weight*amount
+				if share*100000000 > cfg.fees["send"]:
 					_send(arky.core.crypto.bakeTransaction(
-						amount=share * 100000000 - cfg.fees["send"],
+						amount=share*100000000-cfg.fees["send"],
 						recipientId=address,
 						vendorField=param["<message>"],
 						publicKey=DATA.firstkeys["publicKey"],
