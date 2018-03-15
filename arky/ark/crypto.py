@@ -1,21 +1,32 @@
 # -*- encoding: utf8 -*-
 # © Toons
-import binascii
-
-import hashlib
-
-from arky import cfg, slots
-from arky.util import basint, hexlify, pack, pack_bytes, unhexlify
-
-import base58
 
 from ecdsa import BadSignatureError
-from ecdsa.curves import SECP256k1
 from ecdsa.der import UnexpectedDER
 from ecdsa.keys import SigningKey, VerifyingKey
-from ecdsa.util import sigdecode_der, sigencode_der_canonize
+from ecdsa.util import sigencode_der_canonize, sigdecode_der
+from ecdsa.curves import SECP256k1
+import base58
 
-from six import BytesIO
+from .. import __PY3__
+from .. import __FROZEN__
+from .. import cfg
+from .. import slots
+from ..util import basint
+from ..util import unpack
+from ..util import pack
+from ..util import unpack_bytes
+from ..util import pack_bytes
+from ..util import hexlify
+from ..util import unhexlify
+
+if not __PY3__:
+	from StringIO import StringIO
+else:
+	from io import BytesIO as StringIO
+
+import hashlib
+import binascii
 
 
 def compressEcdsaPublicKey(pubkey):
@@ -24,20 +35,17 @@ def compressEcdsaPublicKey(pubkey):
 	even = not bool(basint(last[-1]) % 2)
 	return (b"\x02" if even else b"\x03") + first
 
+# Uncompressed public key is:
+# 0x04 + x-coordinate + y-coordinate
+#
+# Compressed public key is:
+# 0x02 + x-coordinate if y is even
+# 0x03 + x-coordinate if y is odd
+#
+# y^2 mod p = (x^3 + 7) mod p
 
 def uncompressEcdsaPublicKey(pubkey):
-	"""
-	Uncompressed public key is:
-	0x04 + x-coordinate + y-coordinate
-
-	Compressed public key is:
-	0x02 + x-coordinate if y is even
-	0x03 + x-coordinate if y is odd
-
-	y^2 mod p = (x^3 + 7) mod p
-
-	read more : https://bitcointalk.org/index.php?topic=644919.msg7205689#msg7205689
-	"""
+	# read more : https://bitcointalk.org/index.php?topic=644919.msg7205689#msg7205689
 	p = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
 	y_parity = int(pubkey[:2]) - 2
 	x = int(pubkey[2:], 16)
@@ -51,21 +59,17 @@ def uncompressEcdsaPublicKey(pubkey):
 
 def getKeys(secret, seed=None):
 	"""
-	Generate keyring containing public key, signing and checking keys as
-	attribute.
+    Generate keyring containing public key, signing and checking keys as
+    attribute.
 
-	Keyword arguments:
-	secret (str or bytes) -- a human pass phrase
-	seed (byte) -- a sha256 sequence bytes (private key actualy)
+    Keyword arguments:
+    secret (str or bytes) -- a human pass phrase
+    seed (byte) -- a sha256 sequence bytes (private key actualy)
 
-	Return dict
-	"""
-	seed = hashlib.sha256(secret.encode('utf-8')).digest() if not seed else seed
-	signingKey = SigningKey.from_secret_exponent(
-		int(binascii.hexlify(seed), 16),
-		SECP256k1,
-		hashlib.sha256
-	)
+    Return dict
+    """
+	seed = hashlib.sha256(secret.encode("utf8") if not isinstance(secret, bytes) else secret).digest() if not seed else seed
+	signingKey = SigningKey.from_secret_exponent(int(binascii.hexlify(seed), 16), SECP256k1, hashlib.sha256)
 	publicKey = signingKey.get_verifying_key().to_string()
 	return {
 		"publicKey": hexlify(compressEcdsaPublicKey(publicKey) if cfg.compressed else publicKey),
@@ -112,11 +116,7 @@ def getSignature(tx, privateKey):
 	Return str
 	"""
 	signingKey = SigningKey.from_string(unhexlify(privateKey), SECP256k1, hashlib.sha256)
-	return hexlify(signingKey.sign_deterministic(
-		getBytes(tx),
-		hashlib.sha256,
-		sigencode=sigencode_der_canonize)
-	)
+	return hexlify(signingKey.sign_deterministic(getBytes(tx), hashlib.sha256, sigencode=sigencode_der_canonize))
 
 
 def getSignatureFromBytes(data, privateKey):
@@ -130,11 +130,7 @@ def getSignatureFromBytes(data, privateKey):
 	Return str
 	"""
 	signingKey = SigningKey.from_string(unhexlify(privateKey), SECP256k1, hashlib.sha256)
-	return hexlify(signingKey.sign_deterministic(
-		data,
-		hashlib.sha256,
-		sigencode=sigencode_der_canonize)
-	)
+	return hexlify(signingKey.sign_deterministic(data, hashlib.sha256, sigencode=sigencode_der_canonize))
 
 
 def getId(tx):
@@ -191,7 +187,7 @@ def getBytes(tx):
 
 	Return bytes sequence
 	"""
-	buf = BytesIO()
+	buf = StringIO()
 	# write type and timestamp
 	pack("<bi", buf, (tx["type"], int(tx["timestamp"])))
 	# write senderPublicKey as bytes in buffer
@@ -204,13 +200,13 @@ def getBytes(tx):
 	if tx.get("recipientId", False):
 		recipientId = base58.b58decode_check(tx["recipientId"])
 	else:
-		recipientId = b"\x00" * 21
+		recipientId = b"\x00"*21
 	pack_bytes(buf, recipientId)
 	# if there is a vendorField
 	if tx.get("vendorField", False):
 		vendorField = tx["vendorField"][:64].ljust(64, "\x00")
 	else:
-		vendorField = "\x00" * 64
+		vendorField = "\x00"*64
 	pack_bytes(buf, vendorField.encode("utf8"))
 	# write amount and fee value
 	pack("<QQ", buf, (int(tx["amount"]), int(tx["fee"])))
@@ -221,9 +217,9 @@ def getBytes(tx):
 		if typ == 1 and "signature" in asset:
 			pack_bytes(buf, unhexlify(asset["signature"]["publicKey"]))
 		elif typ == 2 and "delegate" in asset:
-			pack_bytes(buf, asset["delegate"]["username"])
+			pack_bytes(buf, asset["delegate"]["username"].encode("utf-8"))
 		elif typ == 3 and "votes" in asset:
-			pack_bytes(buf, "".join(asset["votes"]))
+			pack_bytes(buf, "".join(asset["votes"]).encode("utf-8"))
 		else:
 			pass
 	# if there is a signature
@@ -235,7 +231,7 @@ def getBytes(tx):
 
 	result = buf.getvalue()
 	buf.close()
-	return result
+	return result.encode() if not isinstance(result, bytes) else result
 
 
 def bakeTransaction(**kw):
@@ -273,8 +269,8 @@ def bakeTransaction(**kw):
 	}
 
 	# add optional data
-	for key in ["requesterPublicKey", "recipientId", "vendorField", "asset"]:
-		if key in kw:
+	for key in (k for k in ["requesterPublicKey", "recipientId", "vendorField", "asset"] if k in kw):
+		if kw[key]:
 			payload[key] = kw[key]
 
 	# add sender public key if any key or secret is given
