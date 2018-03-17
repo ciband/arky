@@ -60,7 +60,7 @@ def init():
         cfg.headers["nethash"] = network.pop('nethash')
 
         cfg.__dict__.update(network)
-        cfg.fees = rest.GET.api.blocks.getFees(returnKey="fees")
+        cfg.fees = rest.GET.api.blocks.getFees()["fees"]
 
         # select peers immediately and keep refreshing them in a thread so we
         # are sure we make requests to working peers
