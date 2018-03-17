@@ -27,7 +27,7 @@ def init():
     if resp["success"]:
         cfg.headers["version"] = "%s" % rest.GET.api.peers.version(returnKey="version")
         cfg.headers["nethash"] = resp["nethash"]
-        cfg.fees = rest.GET.api.blocks.getFees().get("fees")
+        cfg.fees = rest.GET.api.blocks.getFees()["fees"]
 
         # select peers immediately and keep refreshing them in a thread so we
         # are sure we make requests to working peers
