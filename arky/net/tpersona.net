@@ -1,17 +1,39 @@
 {
+  "timeout": 5,
+  "begintime": [2017, 3, 21, 13],
+  "endpoints": "ark",
+  "familly": "ark",
+  "maxlimit": 50,
+  "maxvotepertx": 1,
+
+  "compressed": true,
   "wif": "ba",
-  "port": 4101,
-  "pubKeyHash": "42",
-  "messagePrefix": "1841726b205369676e6564204d6573736167653a0a",
+  "marker": "42",
+  "slip44": "1",
   "bip32": {
     "private": 70617039,
     "public": 70615956
   },
-  "seeds": [
+
+  "headers" : {
+		"Content-Type" : "application/json; charset=utf-8",
+    "port": "4101"
+	},
+
+  "port": 4101,
+  "peers": [
     "5.135.75.64",
     "5.135.75.65",
     "5.135.75.66",
     "5.135.75.67",
-    "5.135.75.68"
-  ]
+    "5.135.75.68" 
+  ],
+  "broadcast": 5,
+  
+  "explorer" : "http://testnet.explorer.persona.im",
+  "token" : "tpersona",
+	"symbol" : "TPERSONA",
+	"delegate": 51,
+  "blocktime": 8,
+  "blockreward": 8
 }
