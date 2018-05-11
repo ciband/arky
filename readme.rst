@@ -25,7 +25,7 @@ Windows
 
 From development version
 
-``pip install https://github.com/ArkEcosystem/arky/archive/aip11.zip``
+``pip install https://github.com/ArkEcosystem/arky/archive/aip11-dev.zip``
 
 REST API
 ========

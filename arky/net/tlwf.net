@@ -17,7 +17,7 @@
   ],
 
   "explorer" : "https://texplorer.lwfcoin.io",
-  "token" : "localforwarder",
+  "token" : "tlwfcoin",
   "symbol" : "LWF",
   "delegate": 201,
   "blocktime": 15,
