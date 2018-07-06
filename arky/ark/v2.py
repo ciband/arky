@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 # © Toons
 
-from six import PY3
 from collections import OrderedDict
+import struct
+
+from six import PY3
 
 from .. import slots
 from .. import rest
 from .. import cfg
 
 from . import crypto
-from . import init
-
-import struct
 
 PKFMT = "%ss"%33 if PY3 else 33*"c"
 
@@ -53,7 +52,7 @@ class Payload(object):
 		else:
 			raise Exception("no secondSecret or secondPublicKey given")
 		return struct.pack("<33s", crypto.unhexlify(secondPublicKey)) if PY3 else \
-	           struct.pack(33 * "c", secondPublicKey)
+			   struct.pack(33 * "c", secondPublicKey)
 
 	@staticmethod
 	def type2(**kw):
@@ -62,7 +61,7 @@ class Payload(object):
 			length = len(username)
 			if 3 <= length <= 255:
 				return struct.pack("<B%ds" % length, length, username.encode()) if PY3 else \
-				       struct.pack("<B" + length * "c", length, username)
+					   struct.pack("<B" + length * "c", length, username)
 			else:
 				raise Exception("bad username length [3-255]: %s" % username)
 		else:
@@ -74,7 +73,7 @@ class Payload(object):
 		if delegatePublicKey:
 			length = len(delegatePublicKey)
 			return struct.pack("<%ds" % length, delegatePublicKey.encode()) if PY3 else \
-			       struct.pack("<" + length*"c", delegatePublicKey)
+				   struct.pack("<" + length*"c", delegatePublicKey)
 		else:
 			raise Exception("no up/down vote given")
 
@@ -254,7 +253,7 @@ def sendPayload(*payloads):
 
 
 def bakeTransaction(**kw):
-	kw = dict([k,v] for k,v in kw.items() if v)
+	kw = dict([k, v] for k, v in kw.items() if v)
 	tx = Transaction(**kw)
 	tx.finalize(**kw)
 	tx.sign(**kw)
@@ -266,7 +265,7 @@ def bakeTransaction(**kw):
 # high-level broadcasting function for a single tx #
 ####################################################
 def sendTransaction(**kw):
-	tx = bakeTransaction(**dict([k,v] for k,v in kw.items() if v))
+	tx = bakeTransaction(**dict([k, v] for k, v in kw.items() if v))
 	sendPayload(tx)
 
 

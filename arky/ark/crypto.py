@@ -4,9 +4,6 @@ import binascii
 
 import hashlib
 
-from arky import cfg
-from arky.utils.bin import basint, hexlify, pack, pack_bytes, unhexlify
-
 import base58
 
 from ecdsa import BadSignatureError
@@ -16,6 +13,9 @@ from ecdsa.keys import SigningKey, VerifyingKey
 from ecdsa.util import sigdecode_der, sigencode_der_canonize
 
 from six import BytesIO
+
+from arky import cfg
+from arky.utils.bin import basint, hexlify, pack, pack_bytes, unhexlify
 
 
 def compressEcdsaPublicKey(pubkey):
@@ -204,7 +204,8 @@ def getBytes(tx):
 	# if there is a recipientId
 	if tx.get("recipientId", False):
 		recipientId = tx["recipientId"]
-		recipientId = base58.b58decode_check(str(recipientId) if not isinstance(recipientId , bytes) else recipientId)
+		recipientId = base58.b58decode_check(str(recipientId) if not isinstance(recipientId, bytes) \
+			else recipientId)
 	else:
 		recipientId = b"\x00" * 21
 	pack_bytes(buf, recipientId)

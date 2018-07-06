@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # © Toons
 
+from datetime import datetime, timedelta
+
 import pytz
 
 from arky import cfg
-from datetime import datetime, timedelta
-
 
 def getTimestamp(**kw):
 	delta = datetime.timedelta(**kw)

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # © Toons
+
+from datetime import datetime, timedelta
+
 import pytz
 import requests
 
-from datetime import datetime, timedelta
 from arky import cfg, rest, slots
-
 
 def getTokenPrice(token, fiat="usd"):
 	cmc_ark = requests.get(

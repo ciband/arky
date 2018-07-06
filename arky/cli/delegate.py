@@ -3,22 +3,22 @@
 
 """
 Usage:
-    delegate link [<secret>] [<2ndSecret>]
-    delegate unlink
-    delegate save <name>
-    delegate status
-    delegate voters
-    delegate forged
+	delegate link [<secret>] [<2ndSecret>]
+	delegate unlink
+	delegate save <name>
+	delegate status
+	delegate voters
+	delegate forged
 
 Subcommands:
-    link   : link to delegate using secret passphrases. If secret passphrases
-             contains spaces, it must be enclosed within double quotes
-             (ie "secret with spaces").
-    unlink : unlink delegate.
-    save   : encrypt account using pin code and save it localy.
-    status : show information about linked delegate.
-    voters : show voters contributions ([address - vote] pairs).
-    forged : show forge report.
+	link   : link to delegate using secret passphrases. If secret passphrases
+			 contains spaces, it must be enclosed within double quotes
+			 (ie "secret with spaces").
+	unlink : unlink delegate.
+	save   : encrypt account using pin code and save it localy.
+	status : show information about linked delegate.
+	voters : show voters contributions ([address - vote] pairs).
+	forged : show forge report.
 """
 
 import sys

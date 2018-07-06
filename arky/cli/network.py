@@ -3,13 +3,13 @@
 
 """
 Usage:
-    network use [<name> -b <number> -l <ms>]
-    network browse [-t|-a <id>]
-    network publickey <secret>
-    network address <secret>
-    network wif <secret>
-    network delegates
-    network staking
+	network use [<name> -b <number> -l <ms>]
+	network browse [-t|-a <id>]
+	network publickey <secret>
+	network address <secret>
+	network wif <secret>
+	network delegates
+	network staking
 
 Options:
 -b <number> --broadcast <number> peer number to use for broadcast       [default: 10]
@@ -18,12 +18,12 @@ Options:
 -a <id> --address <id>           address id to browse
 
 Subcommands:
-    use       : select network.
-    browse    : browse network.
-    publickey : returns public key from secret.
-    address   : returns address from secret.
-    delegates : show delegate list.
-    staking   : show coin-supply ratio used on delegate voting.
+	use       : select network.
+	browse    : browse network.
+	publickey : returns public key from secret.
+	address   : returns address from secret.
+	delegates : show delegate list.
+	staking   : show coin-supply ratio used on delegate voting.
 """
 
 import logging

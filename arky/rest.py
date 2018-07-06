@@ -5,13 +5,14 @@ import os
 import re
 import sys
 import json
-import pytz
 import logging
 import random
-import requests
-
 from importlib import import_module
 from datetime import datetime
+
+import pytz
+import requests
+
 from arky import __FROZEN__, cfg, ROOT
 
 
@@ -164,7 +165,7 @@ def use(network, **kwargs):
 	except AttributeError:
 		pass
 	paht = os.path.join(ROOT, "net", network + ".net")
-	if(os.path.exists(paht)):
+	if os.path.exists(paht):
 		with io.open(os.path.join(ROOT, "net", network + ".net")) as f:
 			data = json.load(f)
 	else:
