@@ -37,104 +37,104 @@ from arky.utils.cli import prettyPrint, shortAddress
 
 
 def _sign(tx, derivation_path):
-	try:
-		tx = ldgr.signTx(tx, derivation_path, debug=True)
-	except Exception as e:
-		if not len(e.__dict__):
-			sys.stdout.write("%r\n" % e)
-		elif e.sw == 28416:
-			sys.stdout.write("Ledger key is not ready, try again...\n")
-		elif e.sw == 27013:
-			sys.stdout.write("Transaction canceled\n")
-		else:
-			sys.stdout.write("".join(traceback.format_tb(e.__traceback__)).rstrip() + "\n")
-			sys.stdout.write("%r\n" % e)
-	else:
-		return tx
+    try:
+        tx = ldgr.signTx(tx, derivation_path, debug=True)
+    except Exception as e:
+        if not len(e.__dict__):
+            sys.stdout.write("%r\n" % e)
+        elif e.sw == 28416:
+            sys.stdout.write("Ledger key is not ready, try again...\n")
+        elif e.sw == 27013:
+            sys.stdout.write("Transaction canceled\n")
+        else:
+            sys.stdout.write("".join(traceback.format_tb(e.__traceback__)).rstrip() + "\n")
+            sys.stdout.write("%r\n" % e)
+    else:
+        return tx
 
-	return False
+    return False
 
 
 def _whereami():
-	if hasattr(cfg, "slip44"):
-		if DATA.ledger:
-			return "ledger[%s]" % shortAddress(DATA.ledger["address"])
-		else:
-			return "ledger"
-	else:
-		raise ParserException('Ledger not available on {} network'.format(cfg.network))
+    if hasattr(cfg, "slip44"):
+        if DATA.ledger:
+            return "ledger[%s]" % shortAddress(DATA.ledger["address"])
+        else:
+            return "ledger"
+    else:
+        raise ParserException('Ledger not available on {} network'.format(cfg.network))
 
 
 def link(param):
-	if hasattr(cfg, "slip44"):
+    if hasattr(cfg, "slip44"):
 
-		ledger_dpath = "44'/" + cfg.slip44 + "'/%(--account-index)s'/0/%(--address-rank)s" % param
-		try:
-			publicKey = ldgr.getPublicKey(ldgr.parseBip32Path(ledger_dpath))
-			address = arky.core.crypto.getAddress(publicKey)
-			DATA.ledger = rest.GET.api.accounts(address=address).get("account", {})
-		except:
-			sys.stdout.write("Ledger key is not ready, try again...\n")
-		else:
-			if not DATA.ledger:
-				sys.stdout.write("    %s account does not exixts in %s blockchain...\n" % (address, cfg.network))
-			else:
-				DATA.ledger["path"] = ledger_dpath
+        ledger_dpath = "44'/" + cfg.slip44 + "'/%(--account-index)s'/0/%(--address-rank)s" % param
+        try:
+            publicKey = ldgr.getPublicKey(ldgr.parseBip32Path(ledger_dpath))
+            address = arky.core.crypto.getAddress(publicKey)
+            DATA.ledger = rest.GET.api.accounts(address=address).get("account", {})
+        except:
+            sys.stdout.write("Ledger key is not ready, try again...\n")
+        else:
+            if not DATA.ledger:
+                sys.stdout.write("    %s account does not exixts in %s blockchain...\n" % (address, cfg.network))
+            else:
+                DATA.ledger["path"] = ledger_dpath
 
-	else:
-		raise ParserException('Ledger not available on {} network'.format(cfg.network))
+    else:
+        raise ParserException('Ledger not available on {} network'.format(cfg.network))
 
 
 def status(param):
-	if DATA.ledger:
-		data = rest.GET.api.accounts(address=DATA.ledger["address"], returnKey="account")
-		data["derivationPath"] = DATA.ledger["path"]
-		prettyPrint(data)
+    if DATA.ledger:
+        data = rest.GET.api.accounts(address=DATA.ledger["address"], returnKey="account")
+        data["derivationPath"] = DATA.ledger["path"]
+        prettyPrint(data)
 
 
 def unlink(param):
-	DATA.ledger.clear()
+    DATA.ledger.clear()
 
 
 def send(param):
 
-	if DATA.ledger:
-		amount = floatAmount(param["<amount>"])
-		if amount:
-			sys.stdout.write("Use ledger key to confirm or or cancel :\n")
-			sys.stdout.write("    Send %(amount).8f %(token)s to %(recipientId)s ?\n" % \
-		                    {"token": cfg.token, "amount": amount, "recipientId": param["<address>"]})
-			tx = dict(
-				type=0,
-				timestamp=int(slots.getTime()),
-				fee=cfg.fees["send"],
-				amount=int(amount * 100000000),
-				recipientId=param["<address>"],
-				vendorField=param["<message>"],
-			)
+    if DATA.ledger:
+        amount = floatAmount(param["<amount>"])
+        if amount:
+            sys.stdout.write("Use ledger key to confirm or or cancel :\n")
+            sys.stdout.write("    Send %(amount).8f %(token)s to %(recipientId)s ?\n" % \
+                            {"token": cfg.token, "amount": amount, "recipientId": param["<address>"]})
+            tx = dict(
+                type=0,
+                timestamp=int(slots.getTime()),
+                fee=cfg.fees["send"],
+                amount=int(amount * 100000000),
+                recipientId=param["<address>"],
+                vendorField=param["<message>"],
+            )
 
-			if _sign(tx, DATA.ledger["path"]):
-				_send(tx)
+            if _sign(tx, DATA.ledger["path"]):
+                _send(tx)
 
 
 def vote(param):
 
-	lst, verb, to_vote = _getVoteList(param)
+    lst, verb, to_vote = _getVoteList(param)
 
-	if len(lst):
-		sys.stdout.write("Use ledger key to confirm or or cancel :\n")
-		sys.stdout.write("    %s %s ?\n" % (verb, ", ".join(to_vote)))
-		tx = dict(
-			type=3,
-			timestamp=int(slots.getTime()),
-			fee=cfg.fees["vote"],
-			amount=0,
-			recipientId=DATA.ledger["address"],
-			asset={"votes": lst}
-		)
+    if len(lst):
+        sys.stdout.write("Use ledger key to confirm or or cancel :\n")
+        sys.stdout.write("    %s %s ?\n" % (verb, ", ".join(to_vote)))
+        tx = dict(
+            type=3,
+            timestamp=int(slots.getTime()),
+            fee=cfg.fees["vote"],
+            amount=0,
+            recipientId=DATA.ledger["address"],
+            asset={"votes": lst}
+        )
 
-		if _sign(tx, DATA.ledger["path"]):
-			_send(tx)
+        if _sign(tx, DATA.ledger["path"]):
+            _send(tx)
 
 
 # def validate(param):
