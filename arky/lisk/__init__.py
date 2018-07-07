@@ -43,47 +43,47 @@ def init():
 
 
 def bakeTransaction(**kw):
-	if "publicKey" in kw and "privateKey" in kw:
-		publicKey, privateKey = kw["publicKey"], kw["privateKey"]
-	elif "secret" in kw:
-		keys = crypto.getKeys(kw["secret"])
-		publicKey = keys["publicKey"]
-		privateKey = keys["privateKey"]
-	else:
-		raise Exception("Can not initialize transaction (no secret or keys given)")
+    if "publicKey" in kw and "privateKey" in kw:
+        publicKey, privateKey = kw["publicKey"], kw["privateKey"]
+    elif "secret" in kw:
+        keys = crypto.getKeys(kw["secret"])
+        publicKey = keys["publicKey"]
+        privateKey = keys["privateKey"]
+    else:
+        raise Exception("Can not initialize transaction (no secret or keys given)")
 
-	# put mandatory data
-	payload = {
-		"timestamp": int(slots.getTime()),
-		"type": int(kw.get("type", 0)),
-		"amount": int(kw.get("amount", 0)),
-		"fee": cfg.fees.get({
-			0: "send",
-			1: "secondsignature",
-			2: "delegate",
-			3: "vote",
-			# 4: "multisignature",
-			# 5: "dapp"
-		}[kw.get("type", 0)])
-	}
-	payload["senderPublicKey"] = publicKey
+    # put mandatory data
+    payload = {
+        "timestamp": int(slots.getTime()),
+        "type": int(kw.get("type", 0)),
+        "amount": int(kw.get("amount", 0)),
+        "fee": cfg.fees.get({
+            0: "send",
+            1: "secondsignature",
+            2: "delegate",
+            3: "vote",
+            # 4: "multisignature",
+            # 5: "dapp"
+        }[kw.get("type", 0)])
+    }
+    payload["senderPublicKey"] = publicKey
 
-	# add optional data
-	for key in (k for k in ["requesterPublicKey", "recipientId", "asset"] if k in kw):
-		payload[key] = kw[key]
+    # add optional data
+    for key in (k for k in ["requesterPublicKey", "recipientId", "asset"] if k in kw):
+        payload[key] = kw[key]
 
-	# sign payload
-	payload["signature"] = crypto.getSignature(payload, privateKey)
-	if kw.get("secondSecret", None):
-		secondKeys = crypto.getKeys(kw["secondSecret"])
-		payload["signSignature"] = crypto.getSignature(payload, secondKeys["privateKey"])
-	elif kw.get("secondPrivateKey", None):
-		payload["signSignature"] = crypto.getSignature(payload, kw["secondPrivateKey"])
+    # sign payload
+    payload["signature"] = crypto.getSignature(payload, privateKey)
+    if kw.get("secondSecret", None):
+        secondKeys = crypto.getKeys(kw["secondSecret"])
+        payload["signSignature"] = crypto.getSignature(payload, secondKeys["privateKey"])
+    elif kw.get("secondPrivateKey", None):
+        payload["signSignature"] = crypto.getSignature(payload, kw["secondPrivateKey"])
 
-	# identify payload
-	payload["id"] = crypto.getId(payload)
+    # identify payload
+    payload["id"] = crypto.getId(payload)
 
-	return payload
+    return payload
 
 
 def sendPayload(*payloads):
