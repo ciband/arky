@@ -63,16 +63,6 @@ class TestArkCrypto(unittest.TestCase):
 			arky.core.crypto.getIdFromBytes(unhexlify(self.hexaTx))
 		)
 
-	def test_bake_transaction(self):
-		self.assertEqual(
-			self.tx,
-			arky.core.crypto.bakeTransaction(
-				secret="secret",
-				timestamp=arky.rest.cfg.begintime.toordinal(),
-				amount=100000000
-			)
-		)
-
 	def test_get_bytes_and_hexlify(self):
 		self.assertEqual(
 			self.hexaTx,

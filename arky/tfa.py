@@ -24,7 +24,7 @@ elapsed = lambda: time.time()%60/60
 
 def seed():
 	"""
-	Gives a sha 256 hash from utc time srting rounded to minute.
+	Give a sha 256 hash from utc time srting rounded to minute.
 	"""
 	utc_data = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M Z")
 	h = hashlib.sha256(utc_data if isinstance(utc_data, bytes) else utc_data.encode()).hexdigest()
@@ -32,6 +32,9 @@ def seed():
 
 
 def pack(*elements):
+	"""
+	Pack element in a single bytearray
+	"""
 	data = bytearray()
 	for elem in filter(lambda e: isinstance(e, (bytes, str)) and len(e) < 256, elements):
 		if not isinstance(elem, bytes):
@@ -42,6 +45,9 @@ def pack(*elements):
 
 
 def unpack(data):
+	"""
+	Unpack element from a single bytearray
+	"""
 	idx = 0
 	elements = []
 	while idx < len(data):
@@ -53,17 +59,19 @@ def unpack(data):
 
 
 def get(privateKey):
+	"""
+	Generate a bytearray containing signature and random seed
+	"""
 	rand = os.urandom(128)
 	return pack(bin.unhexlify(arky.core.crypto.getSignatureFromBytes(seed()+rand, privateKey)), rand)
 
 
 def check(publicKey, data):
+	"""
+	Chack signatures from a bytearray containing signature and random seed
+	"""
 	signature, rand = unpack(data)
 	return arky.core.crypto.verifySignatureFromBytes(seed()+rand, publicKey, bin.hexlify(signature))
-
-
-def post(privateKey, url):
-	pass
 
 
 #############

@@ -36,7 +36,7 @@ def check_latency(peer):
 #  API wrapper  #
 #################
 
-class EndPoint:
+class EndPoint(object):
 
 	@staticmethod
 	def _GET(*args, **kwargs):
@@ -104,15 +104,18 @@ class EndPoint:
 		self.method = method
 
 	def __getattr__(self, attr):
-		if re.match("^_[0-9A-Fa-f].*", attr):
-			attr = attr[1:]
-		return EndPoint(attr, self, self.method)
+		if attr not in ["elem", "parent", "method", "chain"]:
+			if re.match("^_[0-9A-Fa-f].*", attr):
+				attr = attr[1:]
+			return EndPoint(attr, self, self.method)
+		else:
+			return object.__getattr__(self, attr)
 
 	def __call__(self, **kwargs):
 		return self.method(*self.chain(), **kwargs)
 
 	def chain(self):
-		return (self.parent.chain() + [self.elem]) if self.parent else [""]
+		return (self.parent.chain() + [self.elem]) if self.parent!=None else [""]
 
 GET = EndPoint(method=EndPoint._GET)
 POST = EndPoint(method=EndPoint._POST)
@@ -192,8 +195,7 @@ def use(network, **kwargs):
 				cfg.peers = [peer]
 				break
 
-	# if endpoints found, create them and update network
-	if len(cfg.peers): # and load_endpoints(cfg.endpoints):
+	if len(cfg.peers):
 		load(cfg.familly)
 		cfg.network = network
 		cfg.hotmode = True

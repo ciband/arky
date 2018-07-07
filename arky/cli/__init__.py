@@ -53,7 +53,7 @@ class CLI:
 			wai=self.module._whereami()
 		)
 
-	def start(self):
+	def start(self, msg=None):
 		"""
 		Start an interactive CLI
 		"""
@@ -62,7 +62,7 @@ class CLI:
 			'Welcome to arky-cli [Python %(python)s / arky %(arky)s]\n' % {
 				"python": sys.version.split()[0],
 				"arky": __version__,
-			}
+			} if not msg else msg
 		)
 		sys.stdout.write("%s\n" % self.module.__doc__.strip())
 
@@ -210,7 +210,7 @@ def snapLogging():
 	logger = logging.getLogger()
 	previous_logger_handler = logger.handlers.pop(0)
 	if __FROZEN__:
-		filepath = os.path.normpath(os.path.join(ROOT, __name__ + " .log"))
+		filepath = os.path.normpath(os.path.join(ROOT, "cli.log"))
 	else:
 		filepath = os.path.normpath(os.path.join(HOME, "." + __name__))
 	logger.addHandler(logging.FileHandler(filepath))

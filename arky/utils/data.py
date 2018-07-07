@@ -10,7 +10,7 @@ from arky.utils.bin import basint, hexlify, unhexlify
 
 def findNetworks():
 	"""
-	Gets a list of all available networks
+	Get a list of all available networks
 	"""
 	path = os.path.join(ROOT, "net")
 	if not os.path.exists(path):
@@ -23,6 +23,9 @@ def findNetworks():
 
 
 def findAccounts():
+	"""
+	Get a list of all available account
+	"""
 	path = os.path.join(HOME, ".account", cfg.network)
 	if not os.path.exists(path):
 		return []
@@ -35,7 +38,7 @@ def findAccounts():
 
 def createBase(secret):
 	"""
-	Creates a base from a given secret
+	Create a base from a given secret
 	"""
 	hx = [e for e in "0123456789abcdef"]
 	base = ""
