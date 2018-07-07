@@ -17,6 +17,7 @@ install:
   - pipenv install --dev --skip-lock
   - pip install -e .
 script:
+  - pylint ./arky
   - python -m unittest discover
 os:
   - linux

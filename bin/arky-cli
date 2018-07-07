@@ -1,6 +1,13 @@
 #!/usr/bin/env python
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import os, imp, sys
+__FROZEN__ = hasattr(sys, "frozen") or hasattr(sys, "importers") or imp.is_frozen("__main__")
+
+if not __FROZEN__:
+	FOLDER = os.path.dirname(__file__)
+else:
+	FOLDER = os.path.dirname(sys.executable)
+sys.path.append(os.path.join(FOLDER, '..'))
+
 from arky.cli import CLI, launch
 
 if __name__ == "__main__":

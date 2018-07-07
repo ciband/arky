@@ -3,11 +3,11 @@
 
 """
 Usage:
-    ledger link [-i <index> -r <rank>]
-    ledger unlink
-    ledger status
-    ledger send <amount> <address> [<message>]
-    ledger vote [-ud] [<delegates>]
+	ledger link [-i <index> -r <rank>]
+	ledger unlink
+	ledger status
+	ledger send <amount> <address> [<message>]
+	ledger vote [-ud] [<delegates>]
 
 Options:
 -i <index> --account-index <index>  ledger account index  [default: 0]
@@ -16,11 +16,11 @@ Options:
 -d --down                           down vote delegate name folowing
 
 Subcommands:
-    link     : link to ledger account.
-    status   : show information about linked account.
-    send     : send token amount to <address>. You can set a 64-char message.
-    vote     : up or down vote delegate(s). <delegates> can be a coma-separated list
-               or a valid new-line-separated file list conaining delegate names.
+	link     : link to ledger account.
+	status   : show information about linked account.
+	send     : send token amount to <address>. You can set a 64-char message.
+	vote     : up or down vote delegate(s). <delegates> can be a coma-separated list
+			   or a valid new-line-separated file list conaining delegate names.
 """
 #   ledger validate <registry>
 #   validate : validate transaction from registry.
@@ -103,7 +103,7 @@ def send(param):
 		if amount:
 			sys.stdout.write("Use ledger key to confirm or or cancel :\n")
 			sys.stdout.write("    Send %(amount).8f %(token)s to %(recipientId)s ?\n" % \
-		                    {"token": cfg.token, "amount": amount, "recipientId": param["<address>"]})
+							{"token": cfg.token, "amount": amount, "recipientId": param["<address>"]})
 			tx = dict(
 				type=0,
 				timestamp=int(slots.getTime()),

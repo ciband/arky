@@ -3,17 +3,17 @@
 
 """
 Usage:
-    account link [<secret>] [<2ndSecret>|-e]
-    account unlink
-    account status
-    account save <name>
-    account register <username>
-    account register 2ndSecret <secret>
-    account register escrow <thirdparty>
-    account validate [<registry>]
-    account vote [-ud] [<delegates>]
-    account send <amount> <address> [<message>]
-    account wsend <amount> <weighting> [<message>]
+	account link [<secret>] [<2ndSecret>|-e]
+	account unlink
+	account status
+	account save <name>
+	account register <username>
+	account register 2ndSecret <secret>
+	account register escrow <thirdparty>
+	account validate [<registry>]
+	account vote [-ud] [<delegates>]
+	account send <amount> <address> [<message>]
+	account wsend <amount> <weighting> [<message>]
 
 Options:
 -e --escrow  link as escrowed account
@@ -21,23 +21,23 @@ Options:
 -d --down    down vote delegate name folowing
 
 Subcommands:
-    link     : link to account using secret passphrases. If secret passphrases
-               contains spaces, it must be enclosed within double quotes
-               (ie "secret with spaces").
-    unlink   : unlink account.
-    save     : encrypt account using pin code and save it localy.
-    status   : show information about linked account.
-    register : register linked account as delegate;
-               or
-               register second signature to linked account;
-               or
-               register an escrower using an account address or a publicKey.
-    validate : validate transaction from registry.
-    vote     : up or down vote delegate(s). <delegates> can be a coma-separated list
-               or a valid new-line-separated file list conaining delegate names.
-    send     : send token amount to address. You can set a 64-char message.
-    wsend    : send token amount to multiple addresses using <weighting> json file
-	           (address-weight pairs). You can set a 64-char message.
+	link     : link to account using secret passphrases. If secret passphrases
+			   contains spaces, it must be enclosed within double quotes
+			   (ie "secret with spaces").
+	unlink   : unlink account.
+	save     : encrypt account using pin code and save it localy.
+	status   : show information about linked account.
+	register : register linked account as delegate;
+			   or
+			   register second signature to linked account;
+			   or
+			   register an escrower using an account address or a publicKey.
+	validate : validate transaction from registry.
+	vote     : up or down vote delegate(s). <delegates> can be a coma-separated list
+			   or a valid new-line-separated file list conaining delegate names.
+	send     : send token amount to address. You can set a 64-char message.
+	wsend    : send token amount to multiple addresses using <weighting> json file
+			   (address-weight pairs). You can set a 64-char message.
 """
 
 import io
@@ -50,7 +50,6 @@ from arky.cli import checkSecondKeys, checkRegisteredTx, floatAmount, DATA, askY
 from arky.utils.http import getDelegatesPublicKeys
 from arky.utils.cli import prettyPrint, shortAddress, chooseItem, hidenInput, chooseMultipleItem
 from arky.utils.data import createBase, loadJson, loadAccount, dumpJson, dumpAccount, findAccounts
-
 
 
 def _send(payload):
@@ -76,7 +75,7 @@ def _send(payload):
 		registry = loadJson(registry_file, folder)
 		typ_ = payload["type"]
 		sys.stdout.write(("    Broadcasting transaction of %.8f %s to %s\n" % (payload["amount"] / 100000000, cfg.token, payload["recipientId"])) if typ_ == 0 else \
-		                  "    Broadcasting vote...\n" if typ_ == 3 else \
+						  "    Broadcasting vote...\n" if typ_ == 3 else \
 						  "    Broadcasting transaction...\n")
 		resp = arky.core.sendPayload(payload)
 		prettyPrint(resp)
@@ -163,7 +162,7 @@ def link(param):
 
 	if param["<secret>"]:
 		_address = _linkFromSecret(param)
-    
+	
 	else:
 		_address = _linkFromSavedAccounts(param)
 
@@ -218,7 +217,7 @@ def register(param):
 			if askYesOrNo("Register second public key %s ?" % secondPublicKey) \
 			   and checkSecondKeys():
 				sys.stdout.write("    Broadcasting second secret registration...\n")
-				_send(arky.core.crypto.bakeTransaction(
+				_send(arky.core.bakeTransaction(
 					type=1,
 					publicKey=DATA.firstkeys["publicKey"],
 					privateKey=DATA.firstkeys["privateKey"],
@@ -237,7 +236,7 @@ def register(param):
 			if askYesOrNo("Register thirdparty public key %s ?" % secondPublicKey) \
 			   and checkSecondKeys():
 				sys.stdout.write("    Broadcasting thirdparty registration...\n")
-				_send(arky.core.crypto.bakeTransaction(
+				_send(arky.core.bakeTransaction(
 					type=1,
 					publicKey=DATA.firstkeys["publicKey"],
 					privateKey=DATA.firstkeys["privateKey"],
@@ -249,7 +248,7 @@ def register(param):
 			if askYesOrNo("Register %s account as delegate %s ?" % (DATA.account["address"], username)) \
 			   and checkSecondKeys():
 				sys.stdout.write("    Broadcasting delegate registration...\n")
-				_send(arky.core.crypto.bakeTransaction(
+				_send(arky.core.bakeTransaction(
 					type=2,
 					publicKey=DATA.firstkeys["publicKey"],
 					privateKey=DATA.firstkeys["privateKey"],
@@ -300,7 +299,7 @@ def vote(param):
 
 	if len(lst) and askYesOrNo("%s %s ?" % (verb, ", ".join(to_vote))) \
 				and checkSecondKeys():
-		_send(arky.core.crypto.bakeTransaction(
+		_send(arky.core.bakeTransaction(
 			type=3,
 			recipientId=DATA.account["address"],
 			publicKey=DATA.firstkeys["publicKey"],
@@ -315,9 +314,9 @@ def send(param):
 	if DATA.account:
 		amount = floatAmount(param["<amount>"])
 		if amount and askYesOrNo("Send %(amount).8f %(token)s to %(recipientId)s ?" % \
-		                        {"token": cfg.token, "amount": amount, "recipientId": param["<address>"]}) \
-		          and checkSecondKeys():
-			_send(arky.core.crypto.bakeTransaction(
+								{"token": cfg.token, "amount": amount, "recipientId": param["<address>"]}) \
+				  and checkSecondKeys():
+			_send(arky.core.bakeTransaction(
 				amount=amount * 100000000,
 				recipientId=param["<address>"],
 				vendorField=param["<message>"],
@@ -344,13 +343,13 @@ def wsend(param):
 
 		prettyPrint(weighting)
 		if amount and askYesOrNo("Send %(amount).8f %(token)s to %(recipientId)s addresses ?" % \
-		                        {"token": cfg.token, "amount": amount, "recipientId": len(weighting)}) \
+								{"token": cfg.token, "amount": amount, "recipientId": len(weighting)}) \
 				  and checkSecondKeys():
 
 			for address, weight in weighting.items():
 				share = weight * amount
 				if share * 100000000 > cfg.fees["send"]:
-					_send(arky.core.crypto.bakeTransaction(
+					_send(arky.core.bakeTransaction(
 						amount=share * 100000000 - cfg.fees["send"],
 						recipientId=address,
 						vendorField=param["<message>"],

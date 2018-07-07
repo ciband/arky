@@ -7,13 +7,15 @@ import io
 import os
 import sys
 import shlex
-import docopt
 import logging
 import traceback
 import threading
 
 from importlib import import_module
 from builtins import input
+
+import docopt
+
 from six import PY3
 
 import arky
@@ -290,7 +292,7 @@ def checkSecondKeys():
 
 def floatAmount(amount):
 	account = DATA.account if len(DATA.account) else \
-	          DATA.ledger  if len(DATA.ledger)  else \
+			  DATA.ledger  if len(DATA.ledger)  else \
 			  {}
 	if not account:
 		return False

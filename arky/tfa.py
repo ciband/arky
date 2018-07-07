@@ -1,6 +1,5 @@
 # -*- coding:utf8 -*-
 from arky.utils import bin
-from six import PY3
 
 import os
 import arky
@@ -9,6 +8,8 @@ import json
 import socket
 import hashlib
 import datetime
+
+from six import PY3
 
 try:
 	import socketserver
@@ -77,7 +78,7 @@ if SOCKETSERVER:
 
 		def handle(self):
 			data = self.request.recv(1024).strip()
-			
+
 			if TCPHandler.publicKey:
 				try:
 					TCPHandler.check = check(TCPHandler.publicKey, data)
@@ -89,7 +90,7 @@ if SOCKETSERVER:
 				self.request.sendall(b'{"granted":true}')
 			else:
 				self.request.sendall(b'{"granted":false}')
-				
+
 
 	def send(privateKey, host="localhost", port=9999):
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -122,11 +123,11 @@ if SOCKETSERVER:
 		return TCPHandler.check
 
 else:
-	
+
 	class TCPHandler():
 		def __init__(self, *args, **kwargs):
 			raise NotImplementedError("socketserver is not available on this python Version")
-			
+
 	def send(publicKey, host="localhost", port=9999):
 		raise NotImplementedError("socketserver is not available on this python Version")
 

@@ -19,8 +19,8 @@ import arky
 import struct
 
 # this functions turns samely on python 2.x and 3.x
-pack = (lambda f,v: struct.pack(f, v)) if PY3 else \
-	   (lambda f,v: bytes(struct.pack(f, v)))
+PACK = (lambda f, v: struct.pack(f, v)) if PY3 else \
+	(lambda f, v: bytes(struct.pack(f, v)))
 
 
 def parseBip32Path(path):
@@ -40,9 +40,9 @@ def parseBip32Path(path):
 	for pathElement in elements:
 		element = pathElement.split("'")
 		if len(element) == 1:
-			result = result + pack(">I", int(element[0]))	
+			result = result + PACK(">I", int(element[0]))
 		else:
-			result = result + pack(">I", 0x80000000 | int(element[0]))
+			result = result + PACK(">I", 0x80000000 | int(element[0]))
 	return result
 
 
@@ -53,12 +53,12 @@ def buildTxApdu(dongle_path, data):
 	Argument:
 	dongle_path -- value returned by parseBip32Path
 	data -- value returned by arky.core.crypto.getBytes
-	
+
 	Return bytes
 	"""
 
 	path_len = len(dongle_path)
-	
+
 	if len(data) > 255 - (path_len+1):
 		data1 = data[:255-(path_len+1)]
 		data2 = data[255-(path_len+1):]
@@ -66,7 +66,7 @@ def buildTxApdu(dongle_path, data):
 	else:
 		data1 = data
 		data2 = util.unhexlify("")
-		p1 =  util.unhexlify("e0048040")
+		p1 = util.unhexlify("e0048040")
 
 	return [
 		p1 + util.intasb(path_len + 1 + len(data1)) + util.intasb(path_len//4) + dongle_path + data1,
@@ -80,12 +80,13 @@ def buildPkeyApdu(dongle_path):
 
 	Argument:
 	dongle_path -- value returned by parseBip32Path
-	
+
 	Return bytes
 	"""
 
 	path_len = len(dongle_path)
-	return util.unhexlify("e0020040") + util.intasb(1 + path_len) + util.intasb(path_len//4) + dongle_path
+	return util.unhexlify("e0020040") + util.intasb(1 + path_len) + \
+		util.intasb(path_len//4) + dongle_path
 
 
 def getPublicKey(dongle_path, debug=False):
@@ -94,10 +95,10 @@ def getPublicKey(dongle_path, debug=False):
 
 	Argument:
 	dongle_path -- value returned by parseBip32Path
-	
+
 	Keyword argument:
 	debug -- flag to activate debug messages from ledger key [default: False]
-	
+
 	Return str (hex)
 	"""
 
@@ -111,7 +112,7 @@ def getPublicKey(dongle_path, debug=False):
 
 def signTx(tx, path, debug=False):
 	"""
-	Sign a transaction. It generates the signature accordingly to derivation path 
+	Sign a transaction. It generates the signature accordingly to derivation path
 	and computes the id of the transaction. The tx is then updated and returned.
 
 	Argument:
@@ -120,7 +121,7 @@ def signTx(tx, path, debug=False):
 
 	Keyword argument:
 	debug -- flag to activate debug messages from ledger key [default: False]
-	
+
 	Return dict
 	"""
 
@@ -135,7 +136,7 @@ def signTx(tx, path, debug=False):
 	if apdu2:
 		result = dongle.exchange(bytes(apdu2))
 	dongle.close()
-	
+
 	# update tx
 	tx["signature"] = util.hexlify(result)
 	tx["id"] = arky.core.crypto.getId(tx)
@@ -179,4 +180,3 @@ def loadBip39(pin, name="unamed"):
 		with io.open(filename, "rb") as in_:
 			tmp = data.unScramble(data.createBase(pin), in_.read())
 		return util.unhexlify(tmp).decode("utf-8")
-
