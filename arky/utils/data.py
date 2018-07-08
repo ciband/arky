@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+"""
+Provides functions to load/save accounts and lists available networks.
+"""
+
 import hashlib
 import io
 import os
@@ -147,6 +152,9 @@ def loadAccount(base, name="unamed"):
 
 
 def dumpJson(cnf, name, folder=None):
+	"""
+	Writes the given JSON data to the given file
+	"""
 	filename = os.path.join(folder or HOME, name)
 	with io.open(filename, "wb") as outfile:
 		outfile.write(json.dumps(cnf, indent=2).encode())
@@ -154,6 +162,9 @@ def dumpJson(cnf, name, folder=None):
 
 
 def loadJson(name, folder=None):
+	"""
+	Loads the JSON data from the given file
+	"""
 	filename = os.path.join(folder or HOME, name)
 	data = {}
 	if os.path.exists(filename):
@@ -164,6 +175,9 @@ def loadJson(name, folder=None):
 
 
 def popJson(name, folder=None):
+	"""
+	Deletes the given JSON file
+	"""
 	filename = os.path.join(folder or HOME, name)
 	if os.path.exists(filename):
 		os.remove(filename)
