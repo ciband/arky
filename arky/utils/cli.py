@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
+
+"""
+Helper functions for the command line interface
+"""
+
 import sys
 import logging
 from getpass import getpass
 
 
 def chooseMultipleItem(msg, *elem):
+	"""
+	Convenience function to allow the user to select multiple items from a list.
+	"""
 	n = len(elem)
 	if n > 0:
 		sys.stdout.write(msg + "\n")
@@ -22,12 +30,15 @@ def chooseMultipleItem(msg, *elem):
 			except:
 				indexes = []
 		return indexes
-	else:
-		sys.stdout.write("Nothing to choose...\n")
-		return False
+	
+	sys.stdout.write("Nothing to choose...\n")
+	return False
 
 
 def chooseItem(msg, *elem):
+	"""
+	Convenience function to allow the user to select a single item from a list.
+	"""
 	n = len(elem)
 	if n > 1:
 		sys.stdout.write(msg + "\n")
@@ -71,6 +82,9 @@ def shortAddress(addr, sep="...", n=5):
 
 
 def prettyfy(dic, tab='\t'):
+	"""
+	Convenience function to output a dictionary in a human readable format.
+	"""
 	result = ""
 	if dic:
 		maxlen = max([len(e) for e in dic.keys()])
@@ -85,11 +99,14 @@ def prettyfy(dic, tab='\t'):
 
 
 def prettyPrint(dic, log=True):
+	"""
+	Prints the given dictionary to stdout.
+	"""
 	pretty = prettyfy(dic)
 	if dic:
 		sys.stdout.write("%s" % pretty)
 		if log:
-			logging.info("\n %s" % pretty.rstrip())
+			logging.info("\n %s", pretty.rstrip())
 	else:
 		sys.stdout.write("\tNothing to print here\n")
 		if log:
