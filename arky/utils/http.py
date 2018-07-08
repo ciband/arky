@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 # © Toons
 
+"""
+HTTP convenience functions.
+"""
+
 from datetime import datetime, timedelta
 
 import pytz
@@ -9,6 +13,8 @@ import requests
 from arky import cfg, rest, slots
 
 def getTokenPrice(token, fiat="usd"):
+	"""Returns the current token price from CoinMarketCap."""
+
 	cmc_ark = requests.get(
 		"https://api.coinmarketcap.com/v1/ticker/{0}/?convert={1}".format(token, fiat.upper()),
 		verify=cfg.verify
@@ -20,6 +26,8 @@ def getTokenPrice(token, fiat="usd"):
 
 
 def getCandidates():
+	"""Returns a list of delegates."""
+
 	candidates = []
 	req = rest.GET.api.delegates(offset=len(candidates), limit=cfg.delegate).get("delegates", [])
 	while not len(req) < cfg.delegate:
@@ -32,10 +40,14 @@ def getCandidates():
 
 
 def getDelegatesPublicKeys(*usernames):
+	"""Returns the public keys for the requested delegates."""
+
 	return [c["publicKey"] for c in getCandidates() if c["username"] in usernames]
 
 
 def getTransactions(timestamp=0, **param):
+	"""Returns a list of transations confirmed after the requested timestamp."""
+
 	param.update(returnKey="transactions", limit=cfg.maxlimit, orderBy="timestamp:desc")
 	txs = rest.GET.api.transactions(**param)
 	if isinstance(txs, list) and len(txs):
@@ -49,18 +61,25 @@ def getTransactions(timestamp=0, **param):
 		raise Exception("Address has null transactions.")
 	else:
 		raise Exception(txs.get("error", "Api error"))
-	return sorted([t for t in txs if t["timestamp"] >= timestamp], key=lambda e: e["timestamp"], reverse=True)
+	return sorted([t for t in txs if t["timestamp"] >= timestamp],
+		key=lambda e: e["timestamp"], reverse=True)
 
 
 def getHistory(address, timestamp=0):
+	"""Returns the transaction history for the given address after the given timestamp."""
+
 	return getTransactions(timestamp, recipientId=address, senderId=address)
 
 
 def getVoteForce(address, **kw):
+	"""Returns the voting force of the given address."""
+
 	# determine timestamp
 	balance = kw.pop("balance", 0) / 100000000.
 	if not balance:
-		balance = float(rest.GET.api.accounts.getBalance(address=address, returnKey="balance")) / 100000000.
+		balance = float(rest.GET.api.accounts.getBalance(address=address,
+			returnKey="balance")) / 100000000.
+
 	delta = timedelta(**kw)
 	if delta.total_seconds() < 86400:
 		return balance
@@ -78,7 +97,9 @@ def getVoteForce(address, **kw):
 	for tx in history:
 		delta_t = (end - tx["timestamp"]) / 3600
 		sum_ += balance * delta_t
-		balance += ((tx["fee"] + tx["amount"]) if tx["senderId"] == address else -tx["amount"]) / 100000000.
+		balance += ((tx["fee"] + tx["amount"]) if tx["senderId"] == address 
+			  else -tx["amount"]) / 100000000.
+
 		if tx["type"] == 3:
 			brk = True
 			break
