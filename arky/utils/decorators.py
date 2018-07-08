@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+"""
+Helper module to provide a timer.
+"""
+
 import threading
 
 
@@ -13,11 +18,23 @@ def setInterval(interval):
 	>>> event.set() # stop printing 'Tick' every 10 sec
 	"""
 	def decorator(function):
+		"""
+		Main decorator function.
+		"""
+
 		def wrapper(*args, **kwargs):
+			"""
+			Helper function to create thread.
+			"""
+
 			stopped = threading.Event()
 
 			# executed in another thread
 			def loop():
+				"""
+				Thread entry point.
+				"""
+
 				# until stopped
 				while not stopped.wait(interval):
 					function(*args, **kwargs)
