@@ -77,9 +77,10 @@ def getVoteForce(address, **kw):
 	# determine timestamp
 	balance = kw.pop("balance", 0) / 100000000.
 	if not balance:
-		balance = float(rest.GET.api.accounts.getBalance(address=address,
-			returnKey="balance")) / 100000000.
-
+		balance = float(rest.GET.api.accounts.getBalance(
+			address=address,
+			returnKey="balance")
+		) / 100000000.
 	delta = timedelta(**kw)
 	if delta.total_seconds() < 86400:
 		return balance
@@ -97,9 +98,10 @@ def getVoteForce(address, **kw):
 	for tx in history:
 		delta_t = (end - tx["timestamp"]) / 3600
 		sum_ += balance * delta_t
-		balance += ((tx["fee"] + tx["amount"]) if tx["senderId"] == address 
-			  else -tx["amount"]) / 100000000.
-
+		balance += (
+			(tx["fee"] + tx["amount"]) if tx["senderId"] == address 
+			else -tx["amount"]
+		) / 100000000.
 		if tx["type"] == 3:
 			brk = True
 			break
