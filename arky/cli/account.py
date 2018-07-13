@@ -45,7 +45,7 @@ import os
 import sys
 
 import arky
-from arky import cfg, HOME, rest, exceptions
+from arky import cfg, HOME, rest
 from arky.cli import checkSecondKeys, checkRegisteredTx, floatAmount, DATA, askYesOrNo
 from arky.utils.http import getDelegatesPublicKeys
 from arky.utils.cli import prettyPrint, shortAddress, chooseItem, hidenInput, chooseMultipleItem
@@ -120,8 +120,7 @@ def _whereami():
 	if DATA.account:
 		return "account[%s]" % shortAddress(DATA.getCurrent1stPKey() if DATA.escrowed else
 											DATA.getCurrentAddress())
-	else:
-		return "account"
+	return "account"
 
 
 def _linkFromSecret(param):
@@ -131,7 +130,7 @@ def _linkFromSecret(param):
 	return address
 
 
-def _linkFromSavedAccounts(param):
+def _linkFromSavedAccounts():
 	choices = findAccounts()
 	if not choices:
 		sys.stdout.write("    No registered account found...\n")
@@ -158,13 +157,14 @@ def _linkFromSavedAccounts(param):
 
 
 def link(param):
-	unlink(param)
+	"""Links an account to the current command line session"""
+	unlink()
 
 	if param["<secret>"]:
 		_address = _linkFromSecret(param)
-	
+
 	else:
-		_address = _linkFromSavedAccounts(param)
+		_address = _linkFromSavedAccounts()
 
 	if not _address:
 		return
@@ -185,7 +185,8 @@ def link(param):
 		DATA.daemon = checkRegisteredTx("%s.registry" % (DATA.account["address"]), os.path.join(HOME, ".registry", cfg.network), quiet=True)
 
 
-def unlink(param):
+def unlink():
+	"""Unlinks the current account from the command line session"""
 	DATA.account.clear()
 	DATA.delegate.clear()
 	DATA.firstkeys.clear()
@@ -193,12 +194,14 @@ def unlink(param):
 	DATA.escrowed = False
 
 
-def status(param):
+def status():
+	"""Gets the status of the current account"""
 	if DATA.account:
 		prettyPrint(rest.GET.api.accounts(address=DATA.account["address"], returnKey="account"))
 
 
 def save(param):
+	"""Saves the current account data, including the private key(s)"""
 	if DATA.account:
 		dumpAccount(
 			createBase(hidenInput("Enter pin code: ")),
@@ -210,6 +213,7 @@ def save(param):
 
 
 def register(param):
+	"""Performs the registrations 2nd secret, escrow, and delegate"""
 
 	if DATA.account:
 		if param["2ndSecret"]:
@@ -258,7 +262,8 @@ def register(param):
 
 
 def validate(param):
-	unlink(param)
+	"""Validates a transaction"""
+	unlink()
 
 	if param["<registry>"]:
 		registry = loadJson(param["<registry>"], os.path.join(HOME, ".escrow", cfg.network))
@@ -294,7 +299,7 @@ def validate(param):
 
 
 def vote(param):
-
+	"""Registers a delegate vote for the current account"""
 	lst, verb, to_vote = _getVoteList(param)
 
 	if len(lst) and askYesOrNo("%s %s ?" % (verb, ", ".join(to_vote))) \
@@ -310,7 +315,7 @@ def vote(param):
 
 
 def send(param):
-
+	"""Posts a transaction to the blockchain"""
 	if DATA.account:
 		amount = floatAmount(param["<amount>"])
 		if amount and askYesOrNo("Send %(amount).8f %(token)s to %(recipientId)s ?" % \
@@ -327,7 +332,7 @@ def send(param):
 
 
 def wsend(param):
-
+	"""Posts a weighted transaction to the blockchain"""
 	if DATA.account:
 		amount = floatAmount(param["<amount>"])
 		weighting = loadJson(param["<weighting>"])

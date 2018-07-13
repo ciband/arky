@@ -35,8 +35,8 @@ def _whereami():
 		_loadDelegate()
 	if DATA.delegate:
 		return "delegate[%s]" % DATA.delegate["username"]
-	else:
-		return "delegate"
+
+	return "delegate"
 
 
 def _loadDelegate():
@@ -45,35 +45,40 @@ def _loadDelegate():
 		if resp.get("publicKey", False):
 			DATA.delegate = resp
 			return True
-		else:
-			return False
+
+		return False
 
 
 def link(param):
+	"""Link to delegate using secret passphrases"""
 	_link(dict(param, **{"--escrow": False}))
 	if not _loadDelegate():
 		sys.stdout.write("Not a delegate\n")
-		unlink(param)
+		unlink()
 
 
-def status(param):
+def status():
+	"""Show information about linked delegate"""
 	if DATA.delegate:
 		account = rest.GET.api.accounts(address=DATA.account["address"], returnKey="account")
 		prettyPrint(dict(account, **DATA.delegate))
 
 
-def unlink(param):
+def unlink():
+	"""Unlink delegate"""
 	DATA.delegate.clear()
 
 
-def forged(param):
+def forged():
+	"""Show forge report"""
 	if DATA.delegate:
 		resp = rest.GET.api.delegates.forging.getForgedByAccount(generatorPublicKey=DATA.account["publicKey"])
 		if resp.pop("success"):
 			prettyPrint(dict([k, float(v) / 100000000] for k, v in resp.items()))
 
 
-def voters(param):
+def voters():
+	"""Show voters contributions"""
 	if DATA.delegate:
 		accounts = rest.GET.api.delegates.voters(publicKey=DATA.delegate["publicKey"]).get("accounts", [])
 		sum_ = 0.

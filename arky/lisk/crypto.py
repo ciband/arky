@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 # © Toons
+
+"""Module to handle Lisk crypto"""
+
 import hashlib
 import struct
-
-from arky import cfg
-from arky.utils.bin import hexlify, pack, pack_bytes, unhexlify
 
 from nacl.bindings import crypto_sign_BYTES
 from nacl.bindings.crypto_sign import crypto_sign, crypto_sign_seed_keypair
 
 from six import BytesIO
 
+from arky import cfg
+from arky.utils.bin import hexlify, pack, pack_bytes, unhexlify
+
 
 def getKeys(secret, seed=None):
+	"""Returns the public/private key pair for a given secret"""
 	if not isinstance(secret, bytes): secret = secret.encode('utf-8')
 	seed = hashlib.sha256(secret).digest() if not seed else seed
 	publicKey, privateKey = list(hexlify(e) for e in crypto_sign_seed_keypair(seed))
@@ -20,11 +24,13 @@ def getKeys(secret, seed=None):
 
 
 def getAddress(public):
+	"""Returns the address for the given public key"""
 	seed = hashlib.sha256(unhexlify(public)).digest()
 	return "%s%s" % (struct.unpack("<Q", seed[:8]) + (cfg.marker,))
 
 
 def getSignature(tx, private):
+	"""Returns the signature for the given transaction"""
 	return hexlify(
 		crypto_sign(
 			hashlib.sha256(getBytes(tx)).digest(),
@@ -34,11 +40,13 @@ def getSignature(tx, private):
 
 
 def getId(tx):
+	"""Returns the id for a given transaction"""
 	seed = hashlib.sha256(getBytes(tx)).digest()
 	return "%s" % struct.unpack("<Q", seed[:8])
 
 
 def getBytes(tx):
+	"""Returns the packed transaction bytes for a given transaction"""
 	buf = BytesIO()
 
 	# write type and timestamp

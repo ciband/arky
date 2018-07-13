@@ -30,7 +30,7 @@ def chooseMultipleItem(msg, *elem):
 			except:
 				indexes = []
 		return indexes
-	
+
 	sys.stdout.write("Nothing to choose...\n")
 	return False
 

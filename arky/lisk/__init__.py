@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # © Toons
+
+"""Module to support Lisk blockchain"""
+
 import sys
 
 from arky import cfg, rest, slots
@@ -9,6 +12,7 @@ from arky.utils.decorators import setInterval
 
 
 def select_peers():
+	"""Selects available peers"""
 	selection = []
 	for seed in cfg.seeds:
 		if rest.check_latency(seed):
@@ -20,10 +24,12 @@ def select_peers():
 
 @setInterval(30)
 def rotate_peers():
+	"""Refreshes peer list"""
 	select_peers()
 
 
 def init():
+	"""Module init"""
 	global DAEMON_PEERS
 	resp = rest.GET.api.blocks.getNethash()
 	if resp["success"]:
@@ -43,6 +49,7 @@ def init():
 
 
 def bakeTransaction(**kw):
+	"""Generates a transaction"""
 	if "publicKey" in kw and "privateKey" in kw:
 		publicKey, privateKey = kw["publicKey"], kw["privateKey"]
 	elif "secret" in kw:
@@ -87,16 +94,15 @@ def bakeTransaction(**kw):
 
 
 def sendPayload(*payloads):
+	"""POSTs a transaction to the blockchain"""
 	result = rest.POST.peer.transactions(transactions=payloads)
 	if result["success"]:
 		result["id"] = [tx["id"] for tx in payloads]
 	return result
 
 
-####################################################
-# high-level broadcasting function for a single tx #
-####################################################
 def sendTransaction(**kw):
+	"""high-level broadcasting function for a single tx"""
 	tx = crypto.bakeTransaction(**dict([k, v] for k, v in kw.items() if v))
 	result = rest.POST.peer.transactions(transactions=[tx])
 	if result["success"]:
@@ -109,6 +115,7 @@ def sendTransaction(**kw):
 #######################
 
 def sendToken(amount, recipientId, secret, secondSecret=None):
+	"""Convenience function to send Lisk"""
 	return sendTransaction(
 		amount=amount,
 		recipientId=recipientId,
@@ -118,6 +125,7 @@ def sendToken(amount, recipientId, secret, secondSecret=None):
 
 
 def registerSecondPublicKey(secondPublicKey, secret):
+	"""Registers a second public key for an account"""
 	keys = crypto.getKeys(secret)
 	return sendTransaction(
 		type=1,
@@ -128,11 +136,13 @@ def registerSecondPublicKey(secondPublicKey, secret):
 
 
 def registerSecondPassphrase(secret, secondSecret):
+	"""Registeres a second passphrase for an account"""
 	secondKeys = crypto.getKeys(secondSecret)
 	return registerSecondPublicKey(secondKeys["publicKey"], secret)
 
 
 def registerDelegate(username, secret, secondSecret=None):
+	"""Registers a delegate"""
 	keys = crypto.getKeys(secret)
 	return sendTransaction(
 		type=2,
@@ -144,6 +154,7 @@ def registerDelegate(username, secret, secondSecret=None):
 
 
 def upVoteDelegate(usernames, secret, secondSecret=None):
+	"""Votes for a delegate"""
 	keys = crypto.getKeys(secret)
 	return sendTransaction(
 		type=3,
@@ -156,6 +167,7 @@ def upVoteDelegate(usernames, secret, secondSecret=None):
 
 
 def downVoteDelegate(usernames, secret, secondSecret=None):
+	"""Unvotes for a delegate"""
 	keys = crypto.getKeys(secret)
 	return sendTransaction(
 		type=3,
@@ -165,4 +177,3 @@ def downVoteDelegate(usernames, secret, secondSecret=None):
 		secondSecret=secondSecret,
 		asset={"votes": ["-%s" % pk for pk in getDelegatesPublicKeys(*usernames)]}
 	)
-

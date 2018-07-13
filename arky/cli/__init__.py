@@ -33,10 +33,12 @@ def _whereami():
 	return ""
 
 def start():
+	"""Starts the command line interface"""
 	CLI().start()
 
 
 class CLI:
+	"""Manager class for the command line interface"""
 
 	def __init__(self):
 		self.enabled = True
@@ -150,6 +152,7 @@ class CLI:
 
 
 class Data(object):
+	"""Helper data object for command line interface"""
 
 	def __init__(self):
 		object.__setattr__(self, "executemode", False)
@@ -157,6 +160,7 @@ class Data(object):
 		self.initialize()
 
 	def initialize(self):
+		"""Initialize data"""
 		self.delegate = {}
 		self.ledger = {}
 		self.account = {}
@@ -181,6 +185,7 @@ class Data(object):
 		object.__setattr__(self, attr, value)
 
 	def getCurrentAccount(self):
+		"""Gets the current account"""
 		if self.account:
 			account = self.account
 		elif self.ledger:
@@ -190,15 +195,19 @@ class Data(object):
 		return account
 
 	def getCurrentAddress(self):
+		"""Gets the address of the current account"""
 		return self.getCurrentAccount().get("address", None)
 
 	def getCurrentBalance(self):
+		"""Gets the balance of the current account"""
 		return float(self.getCurrentAccount().get("balance", 0))
 
 	def getCurrent1stPKey(self):
+		"""Gets the 1st public key of the current account"""
 		return self.getCurrentAccount().get("publicKey", None)
 
 	def getCurrent2ndPKey(self):
+		"""Gets the 2nd public key of the current account"""
 		return self.getCurrentAccount().get("secondPublicKey", None)
 
 
@@ -206,6 +215,7 @@ DATA = Data()
 
 
 def snapLogging():
+	"""Sets logging level to critical"""
 	logging.getLogger('requests').setLevel(logging.CRITICAL)
 	logger = logging.getLogger()
 	previous_logger_handler = logger.handlers.pop(0)
@@ -218,6 +228,7 @@ def snapLogging():
 
 
 def restoreLogging(handler):
+	"""Sets logging level to info"""
 	logging.getLogger('requests').setLevel(logging.INFO)
 	logger = logging.getLogger()
 	logger.handlers.pop(0)
@@ -280,20 +291,23 @@ def checkSecondKeys():
 	secondPublicKey = DATA.account.get("secondPublicKey", False)
 	if secondPublicKey and not DATA.secondkeys and not DATA.escrowed:
 		secondKeys = arky.core.crypto.getKeys(hidenInput("Enter second passphrase: "))
+
 		if secondKeys["publicKey"] == secondPublicKey:
 			DATA.secondkeys = secondKeys
 			return True
-		else:
-			sys.stdout.write("    Second public key missmatch...\n    Broadcast canceled\n")
-			return False
-	else:
-		return True
+
+		sys.stdout.write("    Second public key missmatch...\n    Broadcast canceled\n")
+		return False
+
+	return True
 
 
 def floatAmount(amount):
+	"""Converts the string amount to a float"""
 	account = DATA.account if len(DATA.account) else \
 	          DATA.ledger if len(DATA.ledger) else \
 	          {}
+
 	if not account:
 		return False
 
@@ -308,17 +322,24 @@ def floatAmount(amount):
 				return False
 		return float(amount[:-1]) / 100 * balance - cfg.fees["send"] / 100000000.
 	elif amount[0] in ["$", "€", "£", "¥"]:
-		price = getTokenPrice(cfg.token, {"$": "usd", "EUR": "eur", "€": "eur", "£": "gbp", "¥": "cny"}[amount[0]])
+		price = getTokenPrice(
+			cfg.token, 
+			{"$": "usd", "EUR": "eur", "€": "eur", "£": "gbp", "¥": "cny"}[amount[0]]
+		)
 		result = float(amount[1:]) / price
 		if askYesOrNo("%s=%s%f (%s/%s=%f) - Validate ?" % (amount, cfg.token, result, cfg.token, amount[0], price)):
 			return result
-		else:
-			return False
-	else:
-		return float(amount)
+
+		return False
+
+	return float(amount)
 
 
 def checkRegisteredTx(registry, folder=None, quiet=False):
+	"""
+	Checks to see if a registered transaction has been sent to the blockchain
+	and sends the transaction if it hasn't.
+	"""
 	LOCK = None
 
 	@setInterval(2 * cfg.blocktime)
@@ -357,7 +378,5 @@ def checkRegisteredTx(registry, folder=None, quiet=False):
 
 
 def censorship(argv):
-	"""
-	Censors any delicate information from a given command arguments
-	"""
+	"""Censors any delicate information from a given command arguments"""
 	return " ".join(argv[:2] + ["x" * len(e) for e in ([] if len(argv) <= 2 else argv[2:])])
