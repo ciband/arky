@@ -1,8 +1,8 @@
 # -*- coding:utf8 -*-
-from arky.utils import bin
+
+"""Helper modules for Two Factor Authentication"""
 
 import os
-import arky
 import time
 import json
 import socket
@@ -10,6 +10,10 @@ import hashlib
 import datetime
 
 from six import PY3
+
+import arky
+from arky.utils import bin
+
 
 try:
 	import socketserver
@@ -80,11 +84,13 @@ def check(publicKey, data):
 if SOCKETSERVER:
 
 	class TCPHandler(socketserver.BaseRequestHandler):
+		"""Handles TCP communications for 2FA"""
 
 		publicKey = None
 		check = False
 
 		def handle(self):
+			"""Processes TCP request"""
 			data = self.request.recv(1024).strip()
 
 			if TCPHandler.publicKey:
@@ -101,6 +107,7 @@ if SOCKETSERVER:
 
 
 	def send(privateKey, host="localhost", port=9999):
+		"""Sends private key to TCP socket and waits for response"""
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.connect((host, port))
 		try:
@@ -114,6 +121,7 @@ if SOCKETSERVER:
 
 
 	def wait(publicKey, host="localhost", port=9999):
+		"""Listens for signature data on TCP port"""
 		# initialize values on TCPHandler class
 		TCPHandler.publicKey = publicKey
 		TCPHandler.check = False

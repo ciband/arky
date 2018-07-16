@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # © Toons
+
+"""Module to wrap the Ark REST API"""
+
 import io
 import os
 import re
@@ -20,9 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 def check_latency(peer):
-	"""
-	Returns latency in second for a given peer
-	"""
+	"""Returns latency in second for a given peer"""
 	try:
 		request = requests.get(peer, timeout=cfg.timeout, verify=cfg.verify)
 	except Exception:
@@ -37,6 +38,7 @@ def check_latency(peer):
 #################
 
 class EndPoint(object):
+	"""Defines an API endpoint"""
 
 	@staticmethod
 	def _GET(*args, **kwargs):
@@ -115,7 +117,8 @@ class EndPoint(object):
 		return self.method(*self.chain(), **kwargs)
 
 	def chain(self):
-		return (self.parent.chain() + [self.elem]) if self.parent!=None else [""]
+		"""Helper function to chain endpoint calls"""
+		return (self.parent.chain() + [self.elem]) if self.parent != None else [""]
 
 GET = EndPoint(method=EndPoint._GET)
 POST = EndPoint(method=EndPoint._POST)
