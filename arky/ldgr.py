@@ -4,19 +4,20 @@
 """
 This module contains functions to connect with Ledger Nano S
 """
+import io
+import os
+import struct
+
+from six import PY3
 
 from ledgerblue.comm import getDongle
+
 from arky.utils import bin as util
 from arky.utils import data
-from six import PY3
+import arky
 
 from . import HOME
 from . import cfg
-
-import io
-import os
-import arky
-import struct
 
 # this functions turns samely on python 2.x and 3.x
 PACK = (lambda f, v: struct.pack(f, v)) if PY3 else \
@@ -117,7 +118,7 @@ def signTx(tx, path, debug=False):
 
 	Argument:
 	tx -- a dict object containing explicit fields and values defining a valid transaction
-	path -- a derivation path 
+	path -- a derivation path
 
 	Keyword argument:
 	debug -- flag to activate debug messages from ledger key [default: False]

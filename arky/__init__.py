@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # © Toons
 
+"""Main entry point for arky"""
+
 import os
 import sys
 import imp
